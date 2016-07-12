@@ -24,6 +24,8 @@ public class SimulationStatistics {
     private final double averageTransmissionDuration;
     private final double transmissionDurationStandardDeviation;
     
+    private final int networkCycles;
+    
     SimulationStatistics(final int minimumQueueLength,
                          final int maximumQueueLength,
                          final double averageQueueLength,
@@ -31,7 +33,8 @@ public class SimulationStatistics {
                          final int minimumTransmissionDuration,
                          final int maximumTransmissionDuration,
                          final double averageTransmissionDuration,
-                         final double transmissionDurationStandardDeviation) {
+                         final double transmissionDurationStandardDeviation,
+                         final int networkCycles) {
         this.minimumQueueLength = minimumQueueLength;
         this.maximumQueueLength = maximumQueueLength;
         this.averageQueueLength = averageQueueLength;
@@ -41,6 +44,7 @@ public class SimulationStatistics {
         this.averageTransmissionDuration = averageTransmissionDuration;
         this.transmissionDurationStandardDeviation =
                 transmissionDurationStandardDeviation;
+        this.networkCycles = networkCycles;
     }
     
     @Override
@@ -80,7 +84,11 @@ public class SimulationStatistics {
           .append("\n");
         
         sb.append("Transmission duration s.d.: ")
-          .append(transmissionDurationStandardDeviation);
+          .append(transmissionDurationStandardDeviation)
+          .append("\n");
+        
+        sb.append("Total network cycles: ")
+          .append(networkCycles);
         
         return sb.toString();
     }

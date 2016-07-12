@@ -53,6 +53,10 @@ public class PacketRouter {
         return Collections.<PacketRouter>unmodifiableList(neighbors);
     }
     
+    public int queueLength() {
+        return queue.size();
+    }
+    
     public void enqueuePacket(final Packet packet) {
         queue.addLast(packet);
     }
