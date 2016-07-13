@@ -67,6 +67,15 @@ public class Demo {
 //        smallDebugDemo();
 //        System.exit(0);
         
+        PacketRouter pr = new PacketRouter(1);
+        PacketRouter prr = new PacketRouter(4);
+        pr.connect(new PacketRouter(2));
+        pr.connect(new PacketRouter(3));
+        
+        pr.enqueuePacket(new Packet(2, pr, prr));
+        pr.enqueuePacket(new Packet(44, pr, prr));
+        System.out.println(pr);
+        
         int routers = DEFAULT_NUMBER_OF_ROUTERS;
         int links   = DEFAULT_NUMBER_OF_LINKS;
         int packets = DEFAULT_NUMBER_OF_PACKETS;

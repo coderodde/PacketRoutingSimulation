@@ -8,7 +8,7 @@ import java.util.Objects;
  * @author Rodion "rodde" Efremov
  * @version 1.61 (Jul 10, 2016)
  */
-public class Packet {
+public final class Packet {
 
     private final int id;
     private final PacketRouter sourcePacketRouter;
@@ -24,6 +24,16 @@ public class Packet {
         this.targetPacketRouter =
                 Objects.requireNonNull(targetPacketRouter,
                                        "The target packet router is null.");
+        
+        if (sourcePacketRouter.equals(targetPacketRouter)) {
+            throw new IllegalArgumentException(
+                    "The source and target routers are same: " +
+                    sourcePacketRouter);
+        }
+    }
+    
+    public int getId() {
+        return id;
     }
     
     public PacketRouter getSourcePacketRouter() {

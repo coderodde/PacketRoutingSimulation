@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -93,5 +94,38 @@ public final class PacketRouter {
         }
         
         return id == ((PacketRouter) o).id;
+    }
+    
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        
+        sb.append("[PacketRouter: id = ")
+          .append(id)
+          .append(", neighbors = <");
+        
+        if (!neighbors.isEmpty()) {
+            sb.append(neighbors.get(0).id);
+        }
+        
+        for (int i = 1; i < neighbors.size(); ++i) {
+            sb.append(", ").append(neighbors.get(i).id);
+        }
+        
+        sb.append(">, queue = <");
+        
+        final Iterator<Packet> iterator = queue.iterator();
+        
+        if (iterator.hasNext()) {
+            sb.append(iterator.next().getId());
+        }
+        
+        while (iterator.hasNext()) {
+            sb.append(", ").append(iterator.next().getId());
+        }
+        
+        sb.append(">]");
+        
+        return sb.toString();
     }
 }
