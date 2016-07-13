@@ -53,19 +53,19 @@ public class SimulationStatistics {
         
         // Packet queue statistics:
         
-        sb.append("Minimum queue length: ")
+        sb.append("Minimum queue length:          ")
           .append(minimumQueueLength)
           .append("\n");
         
-        sb.append("Maximum queue length: ")
+        sb.append("Maximum queue length:          ")
           .append(maximumQueueLength)
           .append("\n");
         
-        sb.append("Average queue length: ")
+        sb.append("Average queue length:          ")
           .append(averageQueueLength)
           .append("\n");
         
-        sb.append("Queue length s.d.: ")
+        sb.append("Queue length s.d.:             ")
           .append(queueLengthStandardDeviation)
           .append("\n");
         
@@ -83,11 +83,11 @@ public class SimulationStatistics {
           .append(averageTransmissionDuration)
           .append("\n");
         
-        sb.append("Transmission duration s.d.: ")
+        sb.append("Transmission duration s.d.:    ")
           .append(transmissionDurationStandardDeviation)
           .append("\n");
         
-        sb.append("Total network cycles: ")
+        sb.append("Total network cycles:          ")
           .append(networkCycles);
         
         return sb.toString();

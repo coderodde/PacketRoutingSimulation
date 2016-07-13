@@ -2,6 +2,7 @@ package net.coderodde.simulation.network;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.Objects;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Jul 10, 2016)
  */
-public class PacketRouter {
+public final class PacketRouter {
    
     /**
      * The ID of the packet router. The IDs must be unique.
@@ -51,6 +52,26 @@ public class PacketRouter {
     
     public final List<PacketRouter> getNeighbors() {
         return Collections.<PacketRouter>unmodifiableList(neighbors);
+    }
+    
+    public Collection<Packet> getQueue() {
+        return Collections.<Packet>unmodifiableCollection(queue);
+    }
+    
+    /**
+     * Removes the delivered packet from the queue. This {@code PacketRouter} 
+     * must be the target packet router of {@code packet}.
+     * 
+     * @param packet 
+     */
+    public void remove(final Packet packet) {
+        if (!packet.getTargetPacketRouter().equals(this)) {
+            throw new IllegalArgumentException(
+                    "The input packet is not in its " +
+                    "destination packet router.");
+        }
+        
+        queue.remove(packet);
     }
     
     public int queueLength() {

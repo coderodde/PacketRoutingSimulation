@@ -79,13 +79,18 @@ public final class RandomPacketRoutingAlgorithm extends PacketRoutingAlgorithm {
             simulateCycle(network);
             pruneDeliveredPackets(undeliveredPacketSet);
             ++cycles;
-            System.out.println(undeliveredPacketSet.size());
         }
         
         return buildStatistics(cycles);
     }
     
     private SimulationStatistics buildStatistics(final int cycles) {
+//        queueLengthList.clear();
+//        
+//        for (int i = 1; i <= 5; ++i) {
+//            queueLengthList.add(i);
+//        }
+        
         int minQueueLength = queueLengthList.get(0);
         int maxQueueLength = queueLengthList.get(0);
         
@@ -103,13 +108,18 @@ public final class RandomPacketRoutingAlgorithm extends PacketRoutingAlgorithm {
             squaredQueueLengthSum += i * i;
         }
         
+        
         final double queueLengthAverage = 
                 1.0 * queueLengthSum / queueLengthList.size();
         
+//        final double queueLengthSd = sd(queueLengthList);
         final double queueLengthSd = 
-                (1.0 * squaredQueueLengthSum - 
-                 1.0 * queueLengthSum * queueLengthSum / queueLengthList.size()) 
-                 / (queueLengthList.size() - 1);
+                Math.sqrt(
+                    (1.0 * squaredQueueLengthSum - 
+                     1.0 * queueLengthSum * queueLengthSum / 
+                           queueLengthList.size()) 
+                  / (queueLengthList.size() - 1)
+                );
         
         int minHistoryLength = historyMap.values().iterator().next().size();
         int maxHistoryLength = minHistoryLength;
@@ -134,9 +144,12 @@ public final class RandomPacketRoutingAlgorithm extends PacketRoutingAlgorithm {
                 1.0 * historyLengthSum / historyMap.size();
         
         final double historyLengthSd = 
-                (1.0 * squaredHistoryLengthSum -
-                 1.0 * historyLengthSum * historyLengthSum / historyMap.size())
-                / (historyMap.size() - 1);
+                Math.sqrt(
+                    (1.0 * squaredHistoryLengthSum -
+                     1.0 * historyLengthSum * historyLengthSum / 
+                           historyMap.size())
+                  / (historyMap.size() - 1)
+                );
         
         return new SimulationStatistics(minQueueLength,
                                         maxQueueLength,
@@ -149,13 +162,48 @@ public final class RandomPacketRoutingAlgorithm extends PacketRoutingAlgorithm {
                                         cycles);
     }
     
+    private static double sd(final List<Integer> list) {
+        int sum = 0;
+        
+        for (final Integer i : list) {
+            sum += i;
+        }
+        
+        final double average = 1.0 * sum / list.size();
+        double sum2 = 0.0;
+        
+        for (final Integer i : list) {
+            sum2 += (i - average) * (i - average);
+        }
+        
+        return Math.sqrt(sum2 / (list.size() - 1));
+    }
+    
     private void simulateCycle(final List<PacketRouter> network) {
+        final Map<Packet, PacketRouter> map = new HashMap<>();
+        
+        // Find out to which packet router to send the packets:
         for (final PacketRouter packetRouter : network) {
             if (packetRouter.queueLength() > 0) {
                 final Packet packet = packetRouter.dequeuePacket();
                 final PacketRouter nextPacketRouter = 
                         choose(packetRouter.getNeighbors(), random);
-                nextPacketRouter.enqueuePacket(packet);
+                map.put(packet, nextPacketRouter);
+//                nextPacketRouter.enqueuePacket(packet);
+            }
+        }
+        
+        // Send the packets:
+        for (final Map.Entry<Packet, PacketRouter> entry : map.entrySet()) {
+            final Packet packet = entry.getKey();
+            final PacketRouter packetRouter = entry.getValue();
+            packetRouter.enqueuePacket(packet);
+        }
+        
+        // Update the history of each packet.
+        for (final PacketRouter packetRouter : network) {
+            for (final Packet packet : packetRouter.getQueue()) {
+                historyMap.get(packet).add(packetRouter);
             }
         }
     }
@@ -189,6 +237,7 @@ public final class RandomPacketRoutingAlgorithm extends PacketRoutingAlgorithm {
             
             if (lastOf(historyOfPacket).equals(targetOfPacket)) {
                 iterator.remove();
+                targetOfPacket.remove(packet);
             }
         }
     }

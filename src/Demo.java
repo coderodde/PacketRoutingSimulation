@@ -12,13 +12,27 @@ import net.coderodde.simulation.network.SimulationStatistics;
 
 public class Demo {
  
-    private static final int DEFAULT_NUMBER_OF_ROUTERS = 4;
-    private static final int DEFAULT_NUMBER_OF_LINKS   = 6;
-    private static final int DEFAULT_NUMBER_OF_PACKETS = 10;
+    private static final int DEFAULT_NUMBER_OF_ROUTERS = 50;
+    private static final int DEFAULT_NUMBER_OF_LINKS   = 350;
+    private static final int DEFAULT_NUMBER_OF_PACKETS = 1000;
     
     private static final int MINIMUM_NUMBER_OF_ROUTERS = 1;
     private static final int MINIMUM_NUMBER_OF_LINKS   = 1;
     private static final int MINIMUM_NUMBER_OF_PACKETS = 1;
+    
+    private static final int BAR_LENGTH = 80;
+    private static final char BAR_CHAR = '-';
+    private static final String BAR;
+    
+    static {
+        final StringBuilder sb = new StringBuilder(BAR_LENGTH);
+        
+        for (int i = 0; i < BAR_LENGTH; ++i) {
+            sb.append(BAR_CHAR);
+        }
+        
+        BAR = sb.toString();
+    }
     
     public static enum ErrorCondition {
         
@@ -50,7 +64,8 @@ public class Demo {
             "    PACKETS the number of packets to simulate.\n";
     
     public static void main(final String[] args) {
-        smallDebugDemo();
+//        smallDebugDemo();
+//        System.exit(0);
         
         int routers = DEFAULT_NUMBER_OF_ROUTERS;
         int links   = DEFAULT_NUMBER_OF_LINKS;
@@ -141,6 +156,23 @@ public class Demo {
         profile(algorithm1, network, packetList);
     }
     
+    private static double sd(final List<Integer> list) {
+        int sum = 0;
+        
+        for (final Integer i : list) {
+            sum += i;
+        }
+        
+        final double average = 1.0 * sum / list.size();
+        double sum2 = 0.0;
+        
+        for (final Integer i : list) {
+            sum2 += (i - average) * (i - average);
+        }
+        
+        return Math.sqrt(sum2 / (list.size()) - 1);
+    }
+    
     private static void smallDebugDemo() {
         final List<PacketRouter> network = new ArrayList<>();
         final PacketRouter pr1 = new PacketRouter(1);
@@ -156,11 +188,11 @@ public class Demo {
         pr3.connect(pr1);
         
         final List<Packet> packetList = new ArrayList<>();
-        packetList.add(new Packet(2, pr1, pr2));
-        packetList.add(new Packet(3, pr1, pr3));
+        packetList.add(new Packet(12, pr1, pr2));
+        packetList.add(new Packet(13, pr1, pr3));
         
         final RandomPacketRoutingAlgorithm alg = new RandomPacketRoutingAlgorithm();
-        alg.simulate(network, packetList);
+        System.out.println(alg.simulate(network, packetList));
     }
     
     private static void profile(final PacketRoutingAlgorithm algorithm,
@@ -171,6 +203,7 @@ public class Demo {
                                                                    packetList);
         final long endTime = System.nanoTime();
         
+        System.out.println(BAR);
         System.out.printf(
                 "[STATISTICS] Actual simulation time: %.1f milliseconds.\n", 
                 (endTime - startTime) / 1e6);
