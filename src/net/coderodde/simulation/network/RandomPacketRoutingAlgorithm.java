@@ -84,13 +84,7 @@ public final class RandomPacketRoutingAlgorithm extends PacketRoutingAlgorithm {
         return buildStatistics(cycles);
     }
     
-    private SimulationStatistics buildStatistics(final int cycles) {
-//        queueLengthList.clear();
-//        
-//        for (int i = 1; i <= 5; ++i) {
-//            queueLengthList.add(i);
-//        }
-        
+    private SimulationStatistics buildStatistics(final int cycles) {   
         int minQueueLength = queueLengthList.get(0);
         int maxQueueLength = queueLengthList.get(0);
         

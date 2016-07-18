@@ -12,6 +12,7 @@ import net.coderodde.simulation.network.Packet;
 import net.coderodde.simulation.network.PacketRouter;
 import net.coderodde.simulation.network.PacketRoutingAlgorithm;
 import net.coderodde.simulation.network.RandomPacketRoutingAlgorithm;
+import net.coderodde.simulation.network.ShortestPathPacketRoutingAlgorithm;
 import net.coderodde.simulation.network.SimulationStatistics;
 
 public class Demo {
@@ -174,7 +175,11 @@ public class Demo {
         final PacketRoutingAlgorithm algorithm1 = 
                 new RandomPacketRoutingAlgorithm();
         
+        final PacketRoutingAlgorithm algorithm2 = 
+                new ShortestPathPacketRoutingAlgorithm();
+        
         profile(algorithm1, network, packetList);
+        profile(algorithm2, network, packetList);
     }
     
     private static double sd(final List<Integer> list) {
