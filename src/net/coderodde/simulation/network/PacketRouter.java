@@ -97,6 +97,11 @@ public final class PacketRouter {
     }
     
     @Override
+    public int hashCode() {
+        return id;
+    }
+    
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         

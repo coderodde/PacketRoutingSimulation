@@ -1,9 +1,13 @@
 
 import java.awt.Point;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import net.coderodde.simulation.network.Packet;
 import net.coderodde.simulation.network.PacketRouter;
 import net.coderodde.simulation.network.PacketRoutingAlgorithm;
@@ -43,7 +47,9 @@ public class Demo {
         TOO_LITTLE_LINKS  (4),
         
         BAD_PACKETS_TOKEN (5),
-        TOO_LITTLE_PACKETS(6);
+        TOO_LITTLE_PACKETS(6),
+        
+        NETWORK_DISCONNECTED(7);
         
         ErrorCondition(final int returnCode) {
             this.returnCode = returnCode;
@@ -156,6 +162,12 @@ public class Demo {
         System.out.printf ("[STATUS] Network build in %.1f milliseconds!\n",
                            (endTime - startTime) / 1e6);
         
+        if (!inputNetworkIsConnected(network)) {
+            System.err.println(
+                    "ERROR: The constructed network is disconnected.");
+            System.exit(ErrorCondition.NETWORK_DISCONNECTED.code());
+        }
+        
         final List<Packet> packetList = createRandomPacketList(network, 
                                                                packets, 
                                                                random);
@@ -231,31 +243,57 @@ public class Demo {
         createRandomPacketList(final List<PacketRouter> network,
                                final int numberOfPackets,
                                final Random random) {
-            if (network.size() < 2) {
-                return new ArrayList<>();
-            }
-            
-            final List<Packet> packetList = new ArrayList<>(numberOfPackets);
-            
-            for (int id = 0; id < numberOfPackets; ++id) {
-                final PacketRouter sourcePacketRouter = 
-                        network.get(random.nextInt(network.size()));
-                
-                PacketRouter targetPacketRouter;
-                
-                do {
-                    targetPacketRouter = 
-                            network.get(random.nextInt(network.size()));
-                } while (targetPacketRouter.equals(sourcePacketRouter));
-                
-                packetList.add(new Packet(id, 
-                                          sourcePacketRouter, 
-                                          targetPacketRouter));
-            }
-            
-            return packetList;
+        if (network.size() < 2) {
+            return new ArrayList<>();
         }
+
+        final List<Packet> packetList = new ArrayList<>(numberOfPackets);
+
+        for (int id = 0; id < numberOfPackets; ++id) {
+            final PacketRouter sourcePacketRouter = 
+                    network.get(random.nextInt(network.size()));
+
+            PacketRouter targetPacketRouter;
+
+            do {
+                targetPacketRouter = 
+                        network.get(random.nextInt(network.size()));
+            } while (targetPacketRouter.equals(sourcePacketRouter));
+
+            packetList.add(new Packet(id, 
+                                      sourcePacketRouter, 
+                                      targetPacketRouter));
+        }
+
+        return packetList;
+    }
     
+    private static boolean inputNetworkIsConnected(
+            final List<PacketRouter> network) {
+        if (network.isEmpty()) {
+            throw new IllegalArgumentException("The input network is empty.");
+        }
+        
+        final Set<PacketRouter> networkAsSet = new HashSet<>(network);
+        final Set<PacketRouter> visitedSet = new HashSet<>();
+        final Deque<PacketRouter> queue = new ArrayDeque<>();
+        
+        queue.add(networkAsSet.iterator().next());
+        
+        while (!queue.isEmpty()) {
+            final PacketRouter current = queue.removeFirst();
+            
+            for (final PacketRouter neighbor : current.getNeighbors()) {
+                if (!visitedSet.contains(neighbor)) {
+                    visitedSet.add(neighbor);
+                    queue.addLast(neighbor);
+                }
+            }
+        }
+        
+        return visitedSet.size() == networkAsSet.size();
+    }    
+        
     private static List<PacketRouter> createRandomNetwork(final int routers,
                                                           int links,
                                                           final Random random) {
