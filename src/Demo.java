@@ -71,18 +71,6 @@ public class Demo {
             "    PACKETS the number of packets to simulate.\n";
     
     public static void main(final String[] args) {
-//        smallDebugDemo();
-//        System.exit(0);
-        
-        PacketRouter pr = new PacketRouter(1);
-        PacketRouter prr = new PacketRouter(4);
-        pr.connect(new PacketRouter(2));
-        pr.connect(new PacketRouter(3));
-        
-        pr.enqueuePacket(new Packet(2, pr, prr));
-        pr.enqueuePacket(new Packet(44, pr, prr));
-        System.out.println(pr);
-        
         int routers = DEFAULT_NUMBER_OF_ROUTERS;
         int links   = DEFAULT_NUMBER_OF_LINKS;
         int packets = DEFAULT_NUMBER_OF_PACKETS;
@@ -180,45 +168,6 @@ public class Demo {
         
         profile(algorithm1, network, packetList);
         profile(algorithm2, network, packetList);
-    }
-    
-    private static double sd(final List<Integer> list) {
-        int sum = 0;
-        
-        for (final Integer i : list) {
-            sum += i;
-        }
-        
-        final double average = 1.0 * sum / list.size();
-        double sum2 = 0.0;
-        
-        for (final Integer i : list) {
-            sum2 += (i - average) * (i - average);
-        }
-        
-        return Math.sqrt(sum2 / (list.size()) - 1);
-    }
-    
-    private static void smallDebugDemo() {
-        final List<PacketRouter> network = new ArrayList<>();
-        final PacketRouter pr1 = new PacketRouter(1);
-        final PacketRouter pr2 = new PacketRouter(2);
-        final PacketRouter pr3 = new PacketRouter(3);
-        
-        network.add(pr1);
-        network.add(pr2);
-        network.add(pr3);
-        
-        pr1.connect(pr2);
-        pr2.connect(pr3);
-        pr3.connect(pr1);
-        
-        final List<Packet> packetList = new ArrayList<>();
-        packetList.add(new Packet(12, pr1, pr2));
-        packetList.add(new Packet(13, pr1, pr3));
-        
-        final RandomPacketRoutingAlgorithm alg = new RandomPacketRoutingAlgorithm();
-        System.out.println(alg.simulate(network, packetList));
     }
     
     private static void profile(final AbstractPacketRoutingAlgorithm algorithm,
