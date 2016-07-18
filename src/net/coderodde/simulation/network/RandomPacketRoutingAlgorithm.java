@@ -58,7 +58,7 @@ public final class RandomPacketRoutingAlgorithm extends AbstractPacketRoutingAlg
         while (!undeliveredPacketSet.isEmpty()) {
             loadPacketRouterQueueLengths(network);
             simulateCycle(network);
-            pruneDeliveredPackets(undeliveredPacketSet);
+            pruneDeliveredPackets();
             ++cycles;
         }
         
@@ -91,9 +91,5 @@ public final class RandomPacketRoutingAlgorithm extends AbstractPacketRoutingAlg
                 historyMap.get(packet).add(packetRouter);
             }
         }
-    }
-    
-    private static <T> T choose(final List<T> list, final Random random) {
-        return list.get(random.nextInt(list.size()));
     }
 }

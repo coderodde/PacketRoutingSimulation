@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -153,7 +154,7 @@ public abstract class AbstractPacketRoutingAlgorithm {
     }
     
     protected void 
-        pruneDeliveredPackets(final Set<Packet> undeliveredPacketSet) {
+        pruneDeliveredPackets() {
         final Iterator<Packet> iterator = undeliveredPacketSet.iterator();
         
         while (iterator.hasNext()) {
@@ -170,5 +171,9 @@ public abstract class AbstractPacketRoutingAlgorithm {
         
     protected static <T> T lastOf(final List<T> list) {
         return list.get(list.size() - 1);
+    }
+    
+    protected static <T> T choose(final List<T> list, final Random random) {
+        return list.get(random.nextInt(list.size()));
     }
 }

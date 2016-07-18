@@ -60,7 +60,7 @@ extends AbstractPacketRoutingAlgorithm {
         while (!undeliveredPacketSet.isEmpty()) {
             loadPacketRouterQueueLengths(network);
             simulateCycle(network);
-            pruneDeliveredPackets(undeliveredPacketSet);
+            pruneDeliveredPackets();
             ++cycles;
         }
             
