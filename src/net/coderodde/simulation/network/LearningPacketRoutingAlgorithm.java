@@ -16,7 +16,7 @@ import java.util.List;
  * @version 1.6 (Jul 11, 2016)
  */
 public final class LearningPacketRoutingAlgorithm 
-extends PacketRoutingAlgorithm {
+extends AbstractPacketRoutingAlgorithm {
 
     @Override
     public SimulationStatistics simulate(List<PacketRouter> network, List<Packet> packetList) {

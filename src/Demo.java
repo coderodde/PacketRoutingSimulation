@@ -10,7 +10,7 @@ import java.util.Random;
 import java.util.Set;
 import net.coderodde.simulation.network.Packet;
 import net.coderodde.simulation.network.PacketRouter;
-import net.coderodde.simulation.network.PacketRoutingAlgorithm;
+import net.coderodde.simulation.network.AbstractPacketRoutingAlgorithm;
 import net.coderodde.simulation.network.RandomPacketRoutingAlgorithm;
 import net.coderodde.simulation.network.ShortestPathPacketRoutingAlgorithm;
 import net.coderodde.simulation.network.SimulationStatistics;
@@ -172,10 +172,10 @@ public class Demo {
         final List<Packet> packetList = createRandomPacketList(network, 
                                                                packets, 
                                                                random);
-        final PacketRoutingAlgorithm algorithm1 = 
+        final AbstractPacketRoutingAlgorithm algorithm1 = 
                 new RandomPacketRoutingAlgorithm();
         
-        final PacketRoutingAlgorithm algorithm2 = 
+        final AbstractPacketRoutingAlgorithm algorithm2 = 
                 new ShortestPathPacketRoutingAlgorithm();
         
         profile(algorithm1, network, packetList);
@@ -221,7 +221,7 @@ public class Demo {
         System.out.println(alg.simulate(network, packetList));
     }
     
-    private static void profile(final PacketRoutingAlgorithm algorithm,
+    private static void profile(final AbstractPacketRoutingAlgorithm algorithm,
                                 final List<PacketRouter> network,
                                 final List<Packet> packetList) {
         final long startTime = System.nanoTime();
