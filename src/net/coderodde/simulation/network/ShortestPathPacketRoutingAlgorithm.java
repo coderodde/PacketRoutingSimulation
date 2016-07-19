@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public final class ShortestPathPacketRoutingAlgorithm 
 extends AbstractPacketRoutingAlgorithm {
-    
+
     /**
      * This map implements the dispatch table. It maps each source packet router
      * <tt>S</tt>, to a partial dispatch table <tt>T(S)</tt>. Each <tt>T(S)</tt>
@@ -29,66 +29,67 @@ extends AbstractPacketRoutingAlgorithm {
      * <tt>D</tt>.
      */
     private Map<PacketRouter, Map<PacketRouter, PacketRouter>> dispatchTable;
-    
+
     public ShortestPathPacketRoutingAlgorithm() {}
-    
+
     private ShortestPathPacketRoutingAlgorithm(final boolean dummy) {
         this.historyMap           = new HashMap<>();
         this.undeliveredPacketSet = new HashSet<>();
         this.queueLengthList      = new ArrayList<>();
         this.dispatchTable        = new HashMap<>();
     }
-    
+
     @Override
     public SimulationStatistics simulate(final List<PacketRouter> network, 
                                          final List<Packet> packetList) {
         final ShortestPathPacketRoutingAlgorithm state = 
                 new ShortestPathPacketRoutingAlgorithm(true);
-        
+
         return state.simulateImpl(network, packetList);
     }    
-    
+
     private SimulationStatistics simulateImpl(final List<PacketRouter> network,
                                               final List<Packet> packetList) {
         initializePackets(packetList);
         buildDispatchTable(network);
-        
+
         undeliveredPacketSet.addAll(packetList);
-        
+
         while (!undeliveredPacketSet.isEmpty()) {
             loadPacketRouterQueueLengths(network);
             simulateCycle(network);
             pruneDeliveredPackets();
             ++cycles;
         }
-            
+
         return buildStatistics();
     }
+
     private void simulateCycle(final List<PacketRouter> network) {
         final Map<Packet, PacketRouter> map = new HashMap<>();
-        
+
         // Find out to which packet routers to send the packets:
         for (final PacketRouter packetRouter : network) {
             if (packetRouter.queueLength() > 0) {
                 final Packet packet = packetRouter.dequeuePacket();
                 final PacketRouter targetRouterOfPacket = 
                         packet.getTargetPacketRouter();
-                
+
                 final PacketRouter nextPacketRouter = 
                         dispatchTable.get(packetRouter)
                                      .get(targetRouterOfPacket);
-                
+
                 map.put(packet, nextPacketRouter);
             }
         }
-        
+
         // Send the packets:
         for (final Map.Entry<Packet, PacketRouter> entry : map.entrySet()) {
             final Packet packet = entry.getKey();
             final PacketRouter packetRouter = entry.getValue();
             packetRouter.enqueuePacket(packet);
         }
-        
+
         // Update the history of each packet.
         for (final PacketRouter packetRouter : network) {
             for (final Packet packet : packetRouter.getQueue()) {
@@ -96,28 +97,28 @@ extends AbstractPacketRoutingAlgorithm {
             }
         }
     }
-    
+
     private void buildDispatchTable(final List<PacketRouter> network) {
         for (final PacketRouter source : network) {
             // Create the local dispatch table for the packet router 'source':
             final Map<PacketRouter, PacketRouter> parentMap = 
                     runBreadthFirstSearchFrom(source);
-            
+
             final Map<PacketRouter, PacketRouter> localDispatchTable =
                     new HashMap<>();
-            
+
             dispatchTable.put(source, localDispatchTable);
-            
+
             for (final PacketRouter target : network) {
                 if (target.equals(source)) {
                     // Trivial path (source -> source) does not have to be
                     // considered.
                     continue;
                 }
-                
+
                 final List<PacketRouter> shortestPath = 
                         constructPath(target, parentMap);
-                
+
                 // shortestPath.get(0) is the source;
                 // shortestPath.get(shortestPath.size() - 1) is the target;
                 // If we want to reach 'target' from 'source' via a shortest 
@@ -127,17 +128,17 @@ extends AbstractPacketRoutingAlgorithm {
             }
         }
     }
-    
+
     private Map<PacketRouter, PacketRouter> 
         runBreadthFirstSearchFrom(final PacketRouter source) {
         final Deque<PacketRouter> queue = 
                 new ArrayDeque<>(Arrays.asList(source));
         final Map<PacketRouter, PacketRouter> parentMap = new HashMap<>();
         parentMap.put(source, null);
-        
+
         while (!queue.isEmpty()) {
             final PacketRouter current = queue.removeFirst();
-            
+
             for (final PacketRouter neighbor : current.getNeighbors()) {
                 if (!parentMap.containsKey(neighbor)) {
                     parentMap.put(neighbor, current);
@@ -145,21 +146,21 @@ extends AbstractPacketRoutingAlgorithm {
                 }
             }
         }
-        
+
         return parentMap;
     }
-        
+
     private List<PacketRouter> constructPath(
             final PacketRouter target,
             final Map<PacketRouter, PacketRouter> parentMap) {
         final List<PacketRouter> path = new ArrayList<>();
         PacketRouter current = target;
-        
+
         while (current != null) {
             path.add(current);
             current = parentMap.get(current);
         }
-        
+
         Collections.<PacketRouter>reverse(path);
         return path;
     }

@@ -20,12 +20,12 @@ public final class RandomPacketRoutingAlgorithm extends AbstractPacketRoutingAlg
      * The random number generator.
      */
     private Random random;
-    
+
     /**
      * Constructs the API entry object.
      */
     public RandomPacketRoutingAlgorithm() {}
-    
+
     /**
      * Constructs the actual state object of this algorithm.
      * 
@@ -38,35 +38,35 @@ public final class RandomPacketRoutingAlgorithm extends AbstractPacketRoutingAlg
         this.queueLengthList      = new ArrayList<>();
         this.random               = new Random();
     }
-    
+
     @Override
     public SimulationStatistics simulate(final List<PacketRouter> network, 
                                          final List<Packet> packetList) {
         final RandomPacketRoutingAlgorithm state = 
                 new RandomPacketRoutingAlgorithm(true);
-        
+
         return state.simulateImpl(network, packetList);
     }
-    
+
     private SimulationStatistics simulateImpl(final List<PacketRouter> network,
                                               final List<Packet> packetList) {
         initializePackets(packetList);
-        
+
         undeliveredPacketSet.addAll(packetList);
-        
+
         while (!undeliveredPacketSet.isEmpty()) {
             loadPacketRouterQueueLengths(network);
             simulateCycle(network);
             pruneDeliveredPackets();
             ++cycles;
         }
-        
+
         return buildStatistics();
     }
-    
+
     private void simulateCycle(final List<PacketRouter> network) {
         final Map<Packet, PacketRouter> map = new HashMap<>();
-        
+
         // Find out to which packet router to send the packets:
         for (final PacketRouter packetRouter : network) {
             if (packetRouter.queueLength() > 0) {
@@ -76,14 +76,14 @@ public final class RandomPacketRoutingAlgorithm extends AbstractPacketRoutingAlg
                 map.put(packet, nextPacketRouter);
             }
         }
-        
+
         // Send the packets:
         for (final Map.Entry<Packet, PacketRouter> entry : map.entrySet()) {
             final Packet packet = entry.getKey();
             final PacketRouter packetRouter = entry.getValue();
             packetRouter.enqueuePacket(packet);
         }
-        
+
         // Update the history of each packet.
         for (final PacketRouter packetRouter : network) {
             for (final Packet packet : packetRouter.getQueue()) {

@@ -24,7 +24,7 @@ import java.util.Set;
  * @version 1.6 (Jul 18, 2016)
  */
 public abstract class AbstractPacketRoutingAlgorithm {
-    
+
     /**
      * This map maps each packet to its transmission history. The history of
      * each packet is the list of packet routers that the packet had to visit in
@@ -37,25 +37,25 @@ public abstract class AbstractPacketRoutingAlgorithm {
      * the history list would contain <code><3, 5, 5, 1></code>.
      */
     protected Map<Packet, List<PacketRouter>> historyMap;
-    
+
     /**
      * While simulation is running, this set contains only those packets that
      * have not yet reached their respective targets.
      */
     protected Set<Packet> undeliveredPacketSet;
-    
+
     /**
      * This list stores all the queue length in all packet routers at all 
      * network cycles.
      */
     protected List<Integer> queueLengthList;
-    
+
     /**
      * The number of network cycles made in a network. Starts form one as we 
      * count network initialization as well.
      */
     protected int cycles = 1;
-    
+
     /**
      * Runs a packet routing algorithm and returns the statistics of a 
      * simulation run.
@@ -67,29 +67,29 @@ public abstract class AbstractPacketRoutingAlgorithm {
     public abstract SimulationStatistics 
         simulate(final List<PacketRouter> network,
                  final List<Packet> packetList);
-        
+
     protected SimulationStatistics buildStatistics() {   
         int minQueueLength = queueLengthList.get(0);
         int maxQueueLength = queueLengthList.get(0);
-        
+
         int queueLengthSum = 0;
         int squaredQueueLengthSum = 0;
-        
+
         for (final int i : queueLengthList) {
             if (minQueueLength > i) {
                 minQueueLength = i;
             } else if (maxQueueLength < i) {
                 maxQueueLength = i;
             }
-            
+
             queueLengthSum += i;
             squaredQueueLengthSum += i * i;
         }
-        
-        
+
+
         final double queueLengthAverage = 
                 1.0 * queueLengthSum / queueLengthList.size();
-        
+
         final double queueLengthSd = 
                 Math.sqrt(
                     (1.0 * squaredQueueLengthSum - 
@@ -97,29 +97,29 @@ public abstract class AbstractPacketRoutingAlgorithm {
                            queueLengthList.size()) 
                   / (queueLengthList.size() - 1)
                 );
-        
+
         int minHistoryLength = historyMap.values().iterator().next().size();
         int maxHistoryLength = minHistoryLength;
-        
+
         int historyLengthSum = 0;
         int squaredHistoryLengthSum = 0;
-        
+
         for (final List<PacketRouter> history : historyMap.values()) {
             final int length = history.size();
-            
+
             if (minHistoryLength > length) {
                 minHistoryLength = length;
             } else if (maxHistoryLength < length) {
                 maxHistoryLength = length;
             }
-            
+
             historyLengthSum += length;
             squaredHistoryLengthSum += length * length;
         }
-        
+
         final double historyLengthAverage = 
                 1.0 * historyLengthSum / historyMap.size();
-        
+
         final double historyLengthSd = 
                 Math.sqrt(
                     (1.0 * squaredHistoryLengthSum -
@@ -127,7 +127,7 @@ public abstract class AbstractPacketRoutingAlgorithm {
                            historyMap.size())
                   / (historyMap.size() - 1)
                 );
-        
+
         return new SimulationStatistics(minQueueLength,
                                         maxQueueLength,
                                         queueLengthAverage,
@@ -138,44 +138,44 @@ public abstract class AbstractPacketRoutingAlgorithm {
                                         historyLengthSd,
                                         cycles);
     }
-    
+
     protected void initializePackets(final List<Packet> packetList) {
         for (final Packet packet : packetList) {
             packet.getSourcePacketRouter().enqueuePacket(packet);
-            
+
             historyMap.put(packet,
                            new ArrayList<>(
                                    Arrays.asList(
                                            packet.getSourcePacketRouter())));
         }
     }
-        
+
     protected void loadPacketRouterQueueLengths(
             final List<PacketRouter> network) {
         network.forEach((router) -> { 
             queueLengthList.add(router.queueLength()); 
         });
     }
-    
+
     protected void pruneDeliveredPackets() {
         final Iterator<Packet> iterator = undeliveredPacketSet.iterator();
-        
+
         while (iterator.hasNext()) {
             final Packet packet = iterator.next();
             final PacketRouter targetOfPacket = packet.getTargetPacketRouter();
             final List<PacketRouter> historyOfPacket = historyMap.get(packet);
-            
+
             if (lastOf(historyOfPacket).equals(targetOfPacket)) {
                 iterator.remove();
                 targetOfPacket.remove(packet);
             }
         }
     }
-        
+
     protected static <T> T lastOf(final List<T> list) {
         return list.get(list.size() - 1);
     }
-    
+
     protected static <T> T choose(final List<T> list, final Random random) {
         return list.get(random.nextInt(list.size()));
     }

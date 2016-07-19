@@ -13,7 +13,7 @@ public final class Packet {
     private final int id;
     private final PacketRouter sourcePacketRouter;
     private final PacketRouter targetPacketRouter;
-    
+
     public Packet(final int id, 
                   final PacketRouter sourcePacketRouter,
                   final PacketRouter targetPacketRouter) {
@@ -24,39 +24,39 @@ public final class Packet {
         this.targetPacketRouter =
                 Objects.requireNonNull(targetPacketRouter,
                                        "The target packet router is null.");
-        
+
         if (sourcePacketRouter.equals(targetPacketRouter)) {
             throw new IllegalArgumentException(
                     "The source and target routers are same: " +
                     sourcePacketRouter);
         }
     }
-    
+
     public int getId() {
         return id;
     }
-    
+
     public PacketRouter getSourcePacketRouter() {
         return sourcePacketRouter;
     }
-    
+
     public PacketRouter getTargetPacketRouter() {
         return targetPacketRouter;
     }
-    
+
     @Override
     public boolean equals(final Object o) {
         if (o == null) {
             return false;
         }
-        
+
         if (!getClass().equals(o.getClass())) {
             return false;
         }
-        
+
         return id == ((Packet) o).id;
     }
-    
+
     @Override
     public int hashCode() {
         return id;
