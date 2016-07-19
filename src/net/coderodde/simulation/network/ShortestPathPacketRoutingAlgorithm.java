@@ -69,7 +69,7 @@ extends AbstractPacketRoutingAlgorithm {
     private void simulateCycle(final List<PacketRouter> network) {
         final Map<Packet, PacketRouter> map = new HashMap<>();
         
-        // Find out to which packet router to send the packets:
+        // Find out to which packet routers to send the packets:
         for (final PacketRouter packetRouter : network) {
             if (packetRouter.queueLength() > 0) {
                 final Packet packet = packetRouter.dequeuePacket();

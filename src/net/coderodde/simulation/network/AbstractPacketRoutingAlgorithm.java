@@ -153,8 +153,7 @@ public abstract class AbstractPacketRoutingAlgorithm {
         });
     }
     
-    protected void 
-        pruneDeliveredPackets() {
+    protected void pruneDeliveredPackets() {
         final Iterator<Packet> iterator = undeliveredPacketSet.iterator();
         
         while (iterator.hasNext()) {

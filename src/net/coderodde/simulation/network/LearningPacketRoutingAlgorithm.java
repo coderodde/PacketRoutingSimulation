@@ -29,13 +29,15 @@ extends AbstractPacketRoutingAlgorithm {
     
     public LearningPacketRoutingAlgorithm() {}
     
+    private int cycles;
+    
     private LearningPacketRoutingAlgorithm(final boolean dummy) {
         this.historyMap           = new HashMap<>();
         this.undeliveredPacketSet = new HashSet<>();
         this.queueLengthList      = new ArrayList<>();
         this.dispatchTable        = new HashMap<>();
         this.distanceTable        = new HashMap<>();
-        this.random               = new Random();
+        this.random               = new Random(1);
     }
     
     @Override
@@ -44,23 +46,57 @@ extends AbstractPacketRoutingAlgorithm {
         final LearningPacketRoutingAlgorithm state =
                 new LearningPacketRoutingAlgorithm(true);
         
-        return state.simulate(network, packetList);
+        return state.simulateImpl(network, packetList);
     }
     
     private SimulationStatistics simulateImpl(final List<PacketRouter> network,
                                               final List<Packet> packetList) {
+        cycles = 0;
         initializePackets(packetList);
         buildDispatchTable(network);
-        
-        int cycles = 0;
         
         undeliveredPacketSet.addAll(packetList);
         
         while (!undeliveredPacketSet.isEmpty()) {
             loadPacketRouterQueueLengths(network);
             simulateCycle(network);
+            relearnDispatchTable(network);
             pruneDeliveredPackets();
             ++cycles;
+            
+            if (cycles % 50 == 0) {
+                System.out.println(cycles + ": " + undeliveredPacketSet.size());
+            }
+            
+//            if (undeliveredPacketSet.size() == 1) {
+//                Packet last = undeliveredPacketSet.iterator().next();
+//                
+//                List<PacketRouter> history = historyMap.get(last);
+//                List<PacketRouter> compressed = compress(history);
+//                
+//                System.out.println(compressed.get(compressed.size() - 1));
+//            }
+//          
+//            if (undeliveredPacketSet.size() == 11) {
+//                if (count == 1) {
+//                    System.out.println();
+//                }
+//                
+//                if (count == 2) {
+//                    return null;
+//                }
+//                
+//                Packet first = undeliveredPacketSet.iterator().next();
+//                
+//                List<PacketRouter> history = historyMap.get(first);
+//                List<PacketRouter> compressedHistory = compress(history);
+//                
+//                for (PacketRouter pr : compressedHistory) {
+//                    System.out.print(pr.hashCode() + " ");
+//                }
+//                
+//                count++;
+//            }
         }
         
         return buildStatistics(cycles);
@@ -94,7 +130,7 @@ extends AbstractPacketRoutingAlgorithm {
                     
                     do {
                         nextRouter = choose(network, random);
-                    } while (!nextRouter.equals(source));
+                    } while (nextRouter.equals(source));
                     
                     localDispatchTable.put(target, nextRouter);
                 }
@@ -103,6 +139,126 @@ extends AbstractPacketRoutingAlgorithm {
     }
     
     private void simulateCycle(final List<PacketRouter> network) {
+        final Map<Packet, PacketRouter> map = new HashMap<>();
         
+        // Find out to which packet routers to send the packets:
+        for (final PacketRouter packetRouter : network) {
+            if (packetRouter.queueLength() > 0) {
+                final Packet packet = packetRouter.dequeuePacket();
+                final PacketRouter targetRouterOfPacket = 
+                        packet.getTargetPacketRouter();
+                
+                final PacketRouter nextPacketRouter = 
+                        dispatchTable.get(packetRouter)
+                                     .get(targetRouterOfPacket);
+                
+                map.put(packet, nextPacketRouter);
+            }
+        }
+        
+        // Send the packets:
+        for (final Map.Entry<Packet, PacketRouter> entry : map.entrySet()) {
+            final Packet packet = entry.getKey();
+            final PacketRouter packetRouter = entry.getValue();
+            packetRouter.enqueuePacket(packet);
+        }
+        
+        // Update the history of each packet.
+        for (final PacketRouter packetRouter : network) {
+            for (final Packet packet : packetRouter.getQueue()) {
+                historyMap.get(packet).add(packetRouter);
+            }
+        }
+    }
+    
+    private void relearnDispatchTable(final List<PacketRouter> network) {
+        for (final PacketRouter packetRouter : network) {
+            final Map<PacketRouter, PacketRouter> localDispatchTable = 
+                    dispatchTable.get(packetRouter);
+            
+            final Map<PacketRouter, Integer> localDistanceTable =
+                    distanceTable.get(packetRouter);
+            
+            final List<Packet> queue = new ArrayList<>(packetRouter.getQueue());
+            
+            for (final Packet packet : queue) {
+                final List<PacketRouter> history = historyMap.get(packet);
+                final List<PacketRouter> compressedHistory = compress(history);
+                
+                if (compressedHistory.size() >= 3) {
+                    final int length = compressedHistory.size();
+                    final PacketRouter probe1 = compressedHistory
+                            .get(length - 3);
+                    
+                    final PacketRouter probe2 = compressedHistory
+                            .get(length - 2);
+                    
+                    final PacketRouter probe3 = compressedHistory
+                            .get(length - 1);
+                    
+                    if (probe1.equals(probe3) && !probe2.equals(probe1)) {
+                        for (int i = 0; i < compressedHistory.size(); ++i) {
+                            final PacketRouter pr = compressedHistory.get(i);
+                            
+                            if (!packetRouter.equals(pr)) {
+                                localDistanceTable.put(pr, Integer.MAX_VALUE);
+                                localDispatchTable.put(pr, choose(network, random));
+                            }
+                        }
+                    } else {
+                        for (int i = 0; i < compressedHistory.size(); ++i) {
+                            final PacketRouter pr = compressedHistory.get(i);
+
+                            if (!packetRouter.equals(pr)) {
+                                final int distance = compressedHistory.size() - i - 1;
+
+                                if (localDistanceTable.get(pr) > distance) {
+                                    localDistanceTable.put(pr, distance);
+                                    localDispatchTable.put(
+                                            pr, 
+                                            compressedHistory.get(
+                                                    compressedHistory.size() - 2));
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < compressedHistory.size(); ++i) {
+                        final PacketRouter pr = compressedHistory.get(i);
+
+                        if (!packetRouter.equals(pr)) {
+                            final int distance = compressedHistory.size() - i - 1;
+
+                            if (localDistanceTable.get(pr) > distance) {
+                                localDistanceTable.put(pr, distance);
+                                localDispatchTable.put(
+                                        pr, 
+                                        compressedHistory.get(
+                                                compressedHistory.size() - 2));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    public static List<PacketRouter> compress(final List<PacketRouter> history) {
+        final List<PacketRouter> compressedHistory = 
+                new ArrayList<>(history.size());
+        
+        PacketRouter previous = history.get(0);
+        compressedHistory.add(previous);
+        
+        for (int i = 1; i < history.size(); ++i) {
+            final PacketRouter current = history.get(i);
+            
+            if (!current.equals(previous)) {
+                compressedHistory.add(current);
+                previous = current;
+            }
+        }
+        
+        return compressedHistory;
     }
 }
