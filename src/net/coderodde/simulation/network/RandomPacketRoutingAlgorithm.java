@@ -51,7 +51,6 @@ public final class RandomPacketRoutingAlgorithm extends AbstractPacketRoutingAlg
     private SimulationStatistics simulateImpl(final List<PacketRouter> network,
                                               final List<Packet> packetList) {
         initializePackets(packetList);
-        int cycles = 0;
         
         undeliveredPacketSet.addAll(packetList);
         
@@ -62,7 +61,7 @@ public final class RandomPacketRoutingAlgorithm extends AbstractPacketRoutingAlg
             ++cycles;
         }
         
-        return buildStatistics(cycles);
+        return buildStatistics();
     }
     
     private void simulateCycle(final List<PacketRouter> network) {

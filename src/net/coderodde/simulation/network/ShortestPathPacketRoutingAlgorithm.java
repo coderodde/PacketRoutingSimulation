@@ -53,8 +53,6 @@ extends AbstractPacketRoutingAlgorithm {
         initializePackets(packetList);
         buildDispatchTable(network);
         
-        int cycles = 0;
-        
         undeliveredPacketSet.addAll(packetList);
         
         while (!undeliveredPacketSet.isEmpty()) {
@@ -64,7 +62,7 @@ extends AbstractPacketRoutingAlgorithm {
             ++cycles;
         }
             
-        return buildStatistics(cycles);
+        return buildStatistics();
     }
     private void simulateCycle(final List<PacketRouter> network) {
         final Map<Packet, PacketRouter> map = new HashMap<>();

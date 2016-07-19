@@ -26,32 +26,35 @@ extends AbstractPacketRoutingAlgorithm {
     private Map<PacketRouter, Map<PacketRouter, PacketRouter>> dispatchTable;
     private Map<PacketRouter, Map<PacketRouter, Integer>> distanceTable;
     private Random random;
+    private int cycleLimit;
     
     public LearningPacketRoutingAlgorithm() {}
     
-    private int cycles;
-    
-    private LearningPacketRoutingAlgorithm(final boolean dummy) {
+    private LearningPacketRoutingAlgorithm(final int cycleLimit) {
         this.historyMap           = new HashMap<>();
         this.undeliveredPacketSet = new HashSet<>();
         this.queueLengthList      = new ArrayList<>();
         this.dispatchTable        = new HashMap<>();
         this.distanceTable        = new HashMap<>();
         this.random               = new Random(1);
+        this.cycleLimit           = cycleLimit;
+    }
+    
+    public void setCycleLimit(final int cycleLimit) {
+        this.cycleLimit = cycleLimit;
     }
     
     @Override
     public SimulationStatistics simulate(final List<PacketRouter> network,
                                          final List<Packet> packetList) {
         final LearningPacketRoutingAlgorithm state =
-                new LearningPacketRoutingAlgorithm(true);
+                new LearningPacketRoutingAlgorithm(cycleLimit);
         
         return state.simulateImpl(network, packetList);
     }
     
     private SimulationStatistics simulateImpl(final List<PacketRouter> network,
                                               final List<Packet> packetList) {
-        cycles = 0;
         initializePackets(packetList);
         buildDispatchTable(network);
         
@@ -64,42 +67,14 @@ extends AbstractPacketRoutingAlgorithm {
             pruneDeliveredPackets();
             ++cycles;
             
-            if (cycles % 50 == 0) {
-                System.out.println(cycles + ": " + undeliveredPacketSet.size());
+            if (cycleLimit != 0) {
+                if (cycles > cycleLimit) {
+                    return null;
+                }
             }
-            
-//            if (undeliveredPacketSet.size() == 1) {
-//                Packet last = undeliveredPacketSet.iterator().next();
-//                
-//                List<PacketRouter> history = historyMap.get(last);
-//                List<PacketRouter> compressed = compress(history);
-//                
-//                System.out.println(compressed.get(compressed.size() - 1));
-//            }
-//          
-//            if (undeliveredPacketSet.size() == 11) {
-//                if (count == 1) {
-//                    System.out.println();
-//                }
-//                
-//                if (count == 2) {
-//                    return null;
-//                }
-//                
-//                Packet first = undeliveredPacketSet.iterator().next();
-//                
-//                List<PacketRouter> history = historyMap.get(first);
-//                List<PacketRouter> compressedHistory = compress(history);
-//                
-//                for (PacketRouter pr : compressedHistory) {
-//                    System.out.print(pr.hashCode() + " ");
-//                }
-//                
-//                count++;
-//            }
         }
         
-        return buildStatistics(cycles);
+        return buildStatistics();
     }
     
     private void buildDispatchTable(final List<PacketRouter> network) {

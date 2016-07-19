@@ -74,10 +74,6 @@ public class Demo {
             "    PACKETS the number of packets to simulate.\n";
     
     public static void main(final String[] args) {
-//        shit();
-//        System.exit(0);
-//        smallDemo();
-        
         int routers = DEFAULT_NUMBER_OF_ROUTERS;
         int links   = DEFAULT_NUMBER_OF_LINKS;
         int packets = DEFAULT_NUMBER_OF_PACKETS;
@@ -140,7 +136,7 @@ public class Demo {
             }
         }
         
-        final long seed = System.nanoTime();
+        final long seed = 1; System.nanoTime();
         final Random random = new Random(seed);
         
         System.out.println("[INFO] Seed = " + seed);
@@ -170,8 +166,10 @@ public class Demo {
         final AbstractPacketRoutingAlgorithm algorithm1 = 
                 new RandomPacketRoutingAlgorithm();
         
-        final AbstractPacketRoutingAlgorithm algorithm2 =
+        final LearningPacketRoutingAlgorithm algorithm2 =
                 new LearningPacketRoutingAlgorithm();
+        
+        algorithm2.setCycleLimit(4000);
         
         final AbstractPacketRoutingAlgorithm algorithm3 = 
                 new ShortestPathPacketRoutingAlgorithm();

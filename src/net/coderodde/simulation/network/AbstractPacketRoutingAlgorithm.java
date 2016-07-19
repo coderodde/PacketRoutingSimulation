@@ -51,6 +51,12 @@ public abstract class AbstractPacketRoutingAlgorithm {
     protected List<Integer> queueLengthList;
     
     /**
+     * The number of network cycles made in a network. Starts form one as we 
+     * count network initialization as well.
+     */
+    protected int cycles = 1;
+    
+    /**
      * Runs a packet routing algorithm and returns the statistics of a 
      * simulation run.
      * 
@@ -63,7 +69,7 @@ public abstract class AbstractPacketRoutingAlgorithm {
                  final List<Packet> packetList);
         
         
-    protected SimulationStatistics buildStatistics(final int cycles) {   
+    protected SimulationStatistics buildStatistics() {   
         int minQueueLength = queueLengthList.get(0);
         int maxQueueLength = queueLengthList.get(0);
         
@@ -85,7 +91,6 @@ public abstract class AbstractPacketRoutingAlgorithm {
         final double queueLengthAverage = 
                 1.0 * queueLengthSum / queueLengthList.size();
         
-//        final double queueLengthSd = sd(queueLengthList);
         final double queueLengthSd = 
                 Math.sqrt(
                     (1.0 * squaredQueueLengthSum - 
