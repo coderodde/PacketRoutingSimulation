@@ -2,7 +2,6 @@
 import java.awt.Point;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
@@ -13,7 +12,6 @@ import net.coderodde.simulation.network.Packet;
 import net.coderodde.simulation.network.PacketRouter;
 import net.coderodde.simulation.network.AbstractPacketRoutingAlgorithm;
 import net.coderodde.simulation.network.LearningPacketRoutingAlgorithm;
-import static net.coderodde.simulation.network.LearningPacketRoutingAlgorithm.compress;
 import net.coderodde.simulation.network.RandomPacketRoutingAlgorithm;
 import net.coderodde.simulation.network.ShortestPathPacketRoutingAlgorithm;
 import net.coderodde.simulation.network.SimulationStatistics;
@@ -231,8 +229,8 @@ public class Demo {
         return packetList;
     }
     
-    private static boolean inputNetworkIsConnected(
-            final List<PacketRouter> network) {
+    private static boolean 
+        inputNetworkIsConnected(final List<PacketRouter> network) {
         if (network.isEmpty()) {
             throw new IllegalArgumentException("The input network is empty.");
         }
@@ -292,42 +290,5 @@ public class Demo {
         }
         
         return network;
-    }
-    
-    private static void smallDemo() {
-        final PacketRouter pr1 = new PacketRouter(1);
-        final PacketRouter pr2 = new PacketRouter(2);
-        final PacketRouter pr3 = new PacketRouter(3);
-        final PacketRouter pr4 = new PacketRouter(4);
-        
-        pr1.connect(pr2);
-        pr2.connect(pr3);
-        pr3.connect(pr1);
-        pr3.connect(pr4);
-        
-        final List<PacketRouter> network = new ArrayList<>(Arrays.asList(pr1,
-                                                                         pr2,
-                                                                         pr3));
-        
-        final List<Packet> packetList = 
-                new ArrayList<>(Arrays.asList(new Packet(12, pr1, pr2),
-                                              new Packet(13, pr1, pr3)));
-        
-        new LearningPacketRoutingAlgorithm().simulate(network, packetList);
-        System.out.println("done");
-        System.exit(0);
-    }
-    
-    private static void shit() {
-        final List<PacketRouter> list = new ArrayList<>();
-        final PacketRouter pr1 = new PacketRouter(1);
-        final PacketRouter pr2 = new PacketRouter(2);
-        list.add(pr1);
-        list.add(pr2);
-        list.add(pr2);
-        list.add(pr1);
-        list.add(pr1);
-        list.add(pr1);
-        System.out.println(compress(list));
     }
 }

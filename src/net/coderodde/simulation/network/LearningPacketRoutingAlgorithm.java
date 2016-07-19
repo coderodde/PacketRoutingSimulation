@@ -69,6 +69,7 @@ extends AbstractPacketRoutingAlgorithm {
             
             if (cycleLimit != 0) {
                 if (cycles > cycleLimit) {
+                    // Discard all packets in each router.
                     clearNetwork(network);
                     return null;
                 }
@@ -165,59 +166,21 @@ extends AbstractPacketRoutingAlgorithm {
             
             for (final Packet packet : queue) {
                 final List<PacketRouter> history = historyMap.get(packet);
-                final List<PacketRouter> compressedHistory = compress(history);
+                final List<PacketRouter> compressedHistory = 
+                        removeDuplicatesFromHistoryList(history);
                 
-                if (compressedHistory.size() >= 3) {
-                    final int length = compressedHistory.size();
-                    final PacketRouter probe1 = compressedHistory
-                            .get(length - 3);
-                    
-                    final PacketRouter probe2 = compressedHistory
-                            .get(length - 2);
-                    
-                    final PacketRouter probe3 = compressedHistory
-                            .get(length - 1);
-                    
-                    if (probe1.equals(probe3) && !probe2.equals(probe1)) {
-                        for (int i = 0; i < compressedHistory.size(); ++i) {
-                            final PacketRouter pr = compressedHistory.get(i);
-                            
-                            if (!packetRouter.equals(pr)) {
-                                localDistanceTable.put(pr, Integer.MAX_VALUE);
-                                localDispatchTable.put(pr, choose(network, random));
-                            }
-                        }
-                    } else {
-                        for (int i = 0; i < compressedHistory.size(); ++i) {
-                            final PacketRouter pr = compressedHistory.get(i);
+                for (int i = 0; i < compressedHistory.size(); ++i) {
+                    final PacketRouter pr = compressedHistory.get(i);
 
-                            if (!packetRouter.equals(pr)) {
-                                final int distance = compressedHistory.size() - i - 1;
+                    if (!packetRouter.equals(pr)) {
+                        final int distance = compressedHistory.size() - i - 1;
 
-                                if (localDistanceTable.get(pr) > distance) {
-                                    localDistanceTable.put(pr, distance);
-                                    localDispatchTable.put(
-                                            pr, 
-                                            compressedHistory.get(
-                                                    compressedHistory.size() - 2));
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    for (int i = 0; i < compressedHistory.size(); ++i) {
-                        final PacketRouter pr = compressedHistory.get(i);
-
-                        if (!packetRouter.equals(pr)) {
-                            final int distance = compressedHistory.size() - i - 1;
-
-                            if (localDistanceTable.get(pr) > distance) {
-                                localDistanceTable.put(pr, distance);
-                                localDispatchTable.put(
-                                        pr, 
-                                        compressedHistory.get(
-                                                compressedHistory.size() - 2));
-                            }
+                        if (localDistanceTable.get(pr) > distance) {
+                            localDistanceTable.put(pr, distance);
+                            localDispatchTable.put(
+                                    pr, 
+                                    compressedHistory.get(
+                                            compressedHistory.size() - 2));
                         }
                     }
                 }
@@ -225,7 +188,8 @@ extends AbstractPacketRoutingAlgorithm {
         }
     }
     
-    public static List<PacketRouter> compress(final List<PacketRouter> history) {
+    public static List<PacketRouter> 
+        removeDuplicatesFromHistoryList(final List<PacketRouter> history) {
         final List<PacketRouter> compressedHistory = 
                 new ArrayList<>(history.size());
         

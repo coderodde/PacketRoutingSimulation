@@ -68,7 +68,6 @@ public abstract class AbstractPacketRoutingAlgorithm {
         simulate(final List<PacketRouter> network,
                  final List<Packet> packetList);
         
-        
     protected SimulationStatistics buildStatistics() {   
         int minQueueLength = queueLengthList.get(0);
         int maxQueueLength = queueLengthList.get(0);

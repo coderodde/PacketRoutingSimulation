@@ -6,7 +6,12 @@ package net.coderodde.simulation.network;
  *   <li>the minimum queue length,</li>
  *   <li>the maximum queue length,</li>
  *   <li>the average queue length,</li>
- *   <li>the standard deviation of the queue lengths.</li>
+ *   <li>the standard deviation of the queue lengths,</li>
+ *   <li>the minimum transmission duration,</li>
+ *   <li>the maximum transmission duration,</li>
+ *   <li>the average transmission duration,</li>
+ *   <li>the standard deviation of the transmission duration,</li>
+ *   <li>the number of network cycles needed to deliver all packets.</li>
  * </ul>
  * 
  * @author Rodion "rodde" Efremov
