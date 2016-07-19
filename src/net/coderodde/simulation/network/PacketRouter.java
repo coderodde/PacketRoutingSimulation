@@ -87,6 +87,10 @@ public final class PacketRouter {
         return queue.removeFirst();
     }
     
+    public void clearQueue() {
+        queue.clear();
+    }
+    
     @Override
     public boolean equals(final Object o) {
         if (o == null || !getClass().equals(o.getClass())) {

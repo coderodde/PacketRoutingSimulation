@@ -36,7 +36,7 @@ extends AbstractPacketRoutingAlgorithm {
         this.queueLengthList      = new ArrayList<>();
         this.dispatchTable        = new HashMap<>();
         this.distanceTable        = new HashMap<>();
-        this.random               = new Random(1);
+        this.random               = new Random();
         this.cycleLimit           = cycleLimit;
     }
     
@@ -69,12 +69,19 @@ extends AbstractPacketRoutingAlgorithm {
             
             if (cycleLimit != 0) {
                 if (cycles > cycleLimit) {
+                    clearNetwork(network);
                     return null;
                 }
             }
         }
         
         return buildStatistics();
+    }
+    
+    private void clearNetwork(final List<PacketRouter> network) {
+        for (final PacketRouter packetRouter : network) {
+            packetRouter.clearQueue();
+        }
     }
     
     private void buildDispatchTable(final List<PacketRouter> network) {

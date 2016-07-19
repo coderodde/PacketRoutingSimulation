@@ -136,7 +136,7 @@ public class Demo {
             }
         }
         
-        final long seed = 1; System.nanoTime();
+        final long seed = System.nanoTime();
         final Random random = new Random(seed);
         
         System.out.println("[INFO] Seed = " + seed);
